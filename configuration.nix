@@ -155,6 +155,22 @@
   #   enableSSHSupport = true;
   # };
 
+  # git options
+  programs.git = {
+    enable = true;
+    config = {
+      user = {
+        name = "Tristin Xie";
+	email = "tristinxie@gmail.com";
+      };
+      init = {
+        defaultBranch = "main";
+      };
+      pull = {
+        rebase = false;
+      };
+    };
+  };
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
