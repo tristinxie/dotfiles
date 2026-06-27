@@ -11,16 +11,39 @@
     ];
 
   # Bootloader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  # boot.loader.systemd-boot.enable = true;
+  boot.loader = {
+    efi.canTouchEfiVariables = true;
+    grub = {
+      enable = true;
+      efiSupport = true;
+      device = "nodev";
+      useOSProber = true;
+      # gfxmodeEfi = "1024x768";
+      # gfxpayloadEfi = "keep";
+      theme = "${pkgs.kdePackages.breeze-grub}/grub/themes/breeze";
+      extraEntries = ''
+        menuentry "macOS" --class osx --class macos {
+	  search --no-floppy --file --set=root /EFI/OC/OpenCore.efi
+	  chainloader /EFI/OC/OpenCore.efi
+	}
+      '';
+    };
+  };
+
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-
+  
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 7d";
+  };
   # Enable networking
   networking.networkmanager.enable = true;
 
@@ -69,7 +92,7 @@
   };
   # Set your time zone.
   time.timeZone = "America/Los_Angeles";
-
+  time.hardwareClockInLocalTime = true;
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
@@ -127,16 +150,16 @@
     description = "tristin";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
-      kdePackages.kate
-      neovim
-      git
-    #  thunderbird
+      home-manager
+      gparted
+      ntfs3g
+      acpica-tools
     ];
   };
 
   # Install firefox.
   programs.firefox.enable = true;
-
+  
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
@@ -145,6 +168,8 @@
   environment.systemPackages = with pkgs; [
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #  wget
+    vim
+    home-manager
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -155,21 +180,10 @@
   #   enableSSHSupport = true;
   # };
 
-  # git options
-  programs.git = {
+  programs._1password.enable = true;
+  programs._1password-gui = {
     enable = true;
-    config = {
-      user = {
-        name = "Tristin Xie";
-	email = "tristinxie@gmail.com";
-      };
-      init = {
-        defaultBranch = "main";
-      };
-      pull = {
-        rebase = false;
-      };
-    };
+    polkitPolicyOwners = [ "tristin" ];
   };
   # List services that you want to enable:
 
